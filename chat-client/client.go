@@ -18,11 +18,11 @@ func main() {
 
 	g.SetManagerFunc(ui.Layout)
 
-	g.SetKeybinding("nick", gocui.KeyEnter, gocui.ModNone, utils.AcceptAndConnect)
+	g.SetKeybinding("nick", gocui.KeyEnter, gocui.ModNone, utils.Connect)
 
-	g.SetKeybinding("input", gocui.KeyEnter, gocui.ModNone, utils.SendMessage)
+	g.SetKeybinding("input", gocui.KeyEnter, gocui.ModNone, utils.Send)
 
-	g.SetKeybinding("", gocui.KeyCtrlC, gocui.ModNone, utils.DisconnectAndClose)
+	g.SetKeybinding("", gocui.KeyCtrlC, gocui.ModNone, utils.Disconnect)
 
 	g.MainLoop()
 }

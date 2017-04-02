@@ -16,11 +16,12 @@ var (
 	writer     *bufio.Writer
 )
 
-func DisconnectAndClose(g *gocui.Gui, v *gocui.View) error {
+func Disconnect(g *gocui.Gui, v *gocui.View) error {
+	connection.Close()
 	return gocui.ErrQuit
 }
 
-func SendMessage(g *gocui.Gui, v *gocui.View) error {
+func Send(g *gocui.Gui, v *gocui.View) error {
 	writer.WriteString(v.Buffer())
 	writer.Flush()
 	g.Execute(func(g *gocui.Gui) error {
@@ -32,7 +33,7 @@ func SendMessage(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-func AcceptAndConnect(g *gocui.Gui, v *gocui.View) error {
+func Connect(g *gocui.Gui, v *gocui.View) error {
 	// Connect to the server
 	conn, err := net.Dial("tcp", ":5000")
 	if err != nil {
@@ -42,11 +43,12 @@ func AcceptAndConnect(g *gocui.Gui, v *gocui.View) error {
 	// Create server reader and writer and set nick
 	reader = bufio.NewReader(connection)
 	writer = bufio.NewWriter(connection)
-	writer.WriteString("<nick>" + v.Buffer())
+	writer.WriteString("/nick>" + v.Buffer())
 	writer.Flush()
 	// Some UI changes
-	g.SetCurrentView("input")
 	g.SetViewOnTop("messages")
+	g.SetViewOnTop("input")
+	g.SetCurrentView("input")
 	// Wait for server messages
 	messagesView, _ := g.View("messages")
 	go func() {
