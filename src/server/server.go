@@ -1,4 +1,4 @@
-package chat
+package main
 
 import (
 	"bufio"
@@ -10,13 +10,14 @@ import (
 
 // Client struct
 type Client struct {
-	nickname     string
-	conn         net.Conn
-	writer       *bufio.Writer
-	outgoing     chan string
-	reader       *bufio.Reader
-	incoming     chan string
-	disconnected chan bool
+	name       string
+	conn       net.Conn
+	writer     *bufio.Writer
+	reader     *bufio.Reader
+	incoming   chan string
+	outgoing   chan string
+	disconnect chan bool
+	status     int // 1 connected, 0 otherwise
 }
 
 // CreateClient creates new client and starts listening
@@ -26,13 +27,14 @@ func CreateClient(conn net.Conn) *Client {
 	reader := bufio.NewReader(conn)
 
 	client := &Client{
-		nickname:     "user",
-		conn:         conn,
-		writer:       writer,
-		outgoing:     make(chan string),
-		reader:       reader,
-		incoming:     make(chan string),
-		disconnected: make(chan bool),
+		name:       "user",
+		conn:       conn,
+		writer:     writer,
+		outgoing:   make(chan string),
+		reader:     reader,
+		incoming:   make(chan string),
+		disconnect: make(chan bool),
+		status:     1,
 	}
 
 	go client.Write()
@@ -45,7 +47,8 @@ func CreateClient(conn net.Conn) *Client {
 func (client *Client) Write() {
 	for {
 		select {
-		case <-client.disconnected:
+		case <-client.disconnect:
+			client.status = 0
 			break
 		default:
 			msg := <-client.outgoing
@@ -60,18 +63,19 @@ func (client *Client) Read() {
 	for {
 		msg, err := client.reader.ReadString('\n')
 		if err != nil {
-			client.incoming <- fmt.Sprintf("%s disconnected\n", client.nickname)
-			client.disconnected <- true
+			client.incoming <- fmt.Sprintf("- %s disconnected\n", client.name)
+			client.status = 0
+			client.disconnect <- true
 			client.conn.Close()
 			break
 		}
 		switch {
-		case strings.HasPrefix(msg, "/nick>"):
-			nick := strings.TrimSpace(strings.SplitAfter(msg, ">")[1])
-			client.nickname = nick
-			client.incoming <- fmt.Sprintf("%s connected\n", nick)
+		case strings.HasPrefix(msg, "/name>"):
+			name := strings.TrimSpace(strings.SplitAfter(msg, ">")[1])
+			client.name = name
+			client.incoming <- fmt.Sprintf("+ %s connected\n", name)
 		default:
-			client.incoming <- fmt.Sprintf("%s: %s", client.nickname, msg)
+			client.incoming <- fmt.Sprintf("%s: %s", client.name, msg)
 		}
 	}
 }
@@ -117,7 +121,7 @@ func (chat *Chat) Connect(conn net.Conn) {
 	chat.connect <- conn
 }
 
-// Join Creates new client and starts listening
+// Join creates new client and starts listening
 // for client messages.
 func (chat *Chat) Join(conn net.Conn) {
 	client := CreateClient(conn)
@@ -133,7 +137,29 @@ func (chat *Chat) Join(conn net.Conn) {
 func (chat *Chat) Broadcast(data string) {
 	currentTime := time.Now().Format("15:04:05")
 	msg := fmt.Sprintf("[%s] %s", currentTime, data)
+	for i, client := range chat.clients {
+		if client.status == 0 {
+			chat.clients = append(chat.clients[:i], chat.clients[i+1:]...)
+		}
+	}
 	for _, client := range chat.clients {
 		client.outgoing <- msg
+	}
+}
+
+func main() {
+	listener, err := net.Listen("tcp", ":5000")
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	chat := CreateChat()
+
+	for { // listen for connections
+		conn, err := listener.Accept()
+		if err != nil {
+			fmt.Println(err)
+		}
+		chat.Connect(conn)
 	}
 }
