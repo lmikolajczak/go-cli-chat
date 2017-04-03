@@ -63,7 +63,7 @@ func (client *Client) Read() {
 	for {
 		msg, err := client.reader.ReadString('\n')
 		if err != nil {
-			client.incoming <- fmt.Sprintf("- %s disconnected\n", client.name)
+			client.incoming <- fmt.Sprintf("\x1b[0;31m- %s disconnected\033[0m\n", client.name)
 			client.status = 0
 			client.disconnect <- true
 			client.conn.Close()
@@ -73,7 +73,7 @@ func (client *Client) Read() {
 		case strings.HasPrefix(msg, "/name>"):
 			name := strings.TrimSpace(strings.SplitAfter(msg, ">")[1])
 			client.name = name
-			client.incoming <- fmt.Sprintf("+ %s connected\n", name)
+			client.incoming <- fmt.Sprintf("\x1b[0;32m+ %s connected\033[0m\n", name)
 		default:
 			client.incoming <- fmt.Sprintf("%s: %s", client.name, msg)
 		}
@@ -133,13 +133,18 @@ func (chat *Chat) Join(conn net.Conn) {
 	}()
 }
 
+// Remove disconnected client from chat
+func (chat *Chat) Remove(i int) {
+	chat.clients = append(chat.clients[:i], chat.clients[i+1:]...)
+}
+
 // Broadcast sends message to all connected clients.
 func (chat *Chat) Broadcast(data string) {
 	currentTime := time.Now().Format("15:04:05")
 	msg := fmt.Sprintf("[%s] %s", currentTime, data)
 	for i, client := range chat.clients {
 		if client.status == 0 {
-			chat.clients = append(chat.clients[:i], chat.clients[i+1:]...)
+			chat.Remove(i)
 		}
 	}
 	for _, client := range chat.clients {
