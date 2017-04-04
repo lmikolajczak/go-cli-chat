@@ -24,4 +24,4 @@ You might want to specify host and port (in main func) on which server is listen
 
 ### TODO
 
-* [client] add sidebar that shows currently connected users
+* [client][server] code refactoring
