@@ -138,6 +138,18 @@ func (chat *Chat) Remove(i int) {
 	chat.clients = append(chat.clients[:i], chat.clients[i+1:]...)
 }
 
+// UpdateClientsList sends current connected users list
+func (chat *Chat) UpdateClientsList() {
+	connectedClients := "/clients>"
+	for _, client := range chat.clients {
+		connectedClients += client.name + " "
+	}
+	connectedClients += "\n"
+	for _, client := range chat.clients {
+		client.outgoing <- connectedClients
+	}
+}
+
 // Broadcast sends message to all connected clients.
 func (chat *Chat) Broadcast(data string) {
 	currentTime := time.Now().Format("15:04:05")
@@ -147,6 +159,7 @@ func (chat *Chat) Broadcast(data string) {
 			chat.Remove(i)
 		}
 	}
+	chat.UpdateClientsList()
 	for _, client := range chat.clients {
 		client.outgoing <- msg
 	}
