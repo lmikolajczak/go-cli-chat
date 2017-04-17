@@ -1,4 +1,4 @@
-## go-cli-chat
+## 💬 go-cli-chat
 
 Chat server and client written in golang (simple prototype for learning purposes). The application heavily utilizes goroutines and channels. Go makes the concurrency quite easy to use and it is very cool to write such programs in the golang.
 
