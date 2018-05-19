@@ -2,26 +2,20 @@
 
 Chat server and client written in golang (simple prototype for learning purposes). The application heavily utilizes goroutines and channels. Go makes the concurrency quite easy to use and it is very cool to write such programs in the golang.
 
-![chat-client](img/client.png)
+![chat-client](assets/chat.png)
 
 ### Usage
 
-Clone this repository and just simply run:
-
-Server (in go-cli-chat/src/server/):
-
 ```bash
-$ go run server.go
+$ go get github.com/Luqqk/go-cli-chat/...
 ```
 
-Client (in go-cli-chat/src/client/):
+Now you can run server and client:
 
 ```bash
-$ go run client.go
+$ $GOPATH/bin/chat_server
 ```
 
-You might want to specify host and port (in main func) on which server is listening and client is connecting to.
-
-### TODO
-
-* [client][server] code refactoring
+```bash
+$ $GOPATH/bin/chat_client
+```
