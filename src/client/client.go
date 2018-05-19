@@ -72,7 +72,7 @@ func Disconnect(g *gocui.Gui, v *gocui.View) error {
 func Send(g *gocui.Gui, v *gocui.View) error {
 	writer.WriteString(v.Buffer())
 	writer.Flush()
-	g.Execute(func(g *gocui.Gui) error {
+	g.Update(func(g *gocui.Gui) error {
 		v.Clear()
 		v.SetCursor(0, 0)
 		v.SetOrigin(0, 0)
@@ -114,14 +114,14 @@ func Connect(g *gocui.Gui, v *gocui.View) error {
 				for _, client := range clientsSlice {
 					clients += client + "\n"
 				}
-				g.Execute(func(g *gocui.Gui) error {
+				g.Update(func(g *gocui.Gui) error {
 					usersView.Title = fmt.Sprintf(" %d users: ", clientsCount)
 					usersView.Clear()
 					fmt.Fprintln(usersView, clients)
 					return nil
 				})
 			default:
-				g.Execute(func(g *gocui.Gui) error {
+				g.Update(func(g *gocui.Gui) error {
 					fmt.Fprintln(messagesView, msg)
 					return nil
 				})
