@@ -1,4 +1,4 @@
-package main
+package client
 
 import (
 	"bufio"
@@ -35,7 +35,7 @@ func Send(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-// Connect to the server, create new reader, writer set client name
+// Connect to the server, create new reader, writer and set client name
 func Connect(g *gocui.Gui, v *gocui.View) error {
 	conn, err := net.Dial("tcp", ":5000")
 	if err != nil {

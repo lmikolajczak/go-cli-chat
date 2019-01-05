@@ -1,8 +1,8 @@
-package main
+package client
 
 import "github.com/jroimartin/gocui"
 
-// Layout creates chat ui
+// Layout creates chat UI
 func Layout(g *gocui.Gui) error {
 	maxX, maxY := g.Size()
 	g.Cursor = true
