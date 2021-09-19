@@ -1,0 +1,13 @@
+services:
+  server:
+    build: .
+    image: server
+    container_name: server
+    volumes:
+      - .:/code
+  client:
+    build: .
+    image: client
+    container_name: client
+    volumes:
+      - .:/code
