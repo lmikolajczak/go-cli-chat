@@ -1,23 +1,27 @@
 package main
 
 import (
-	"bufio"
-	"fmt"
 	"log"
-	"net"
 	"time"
+
+	"golang.org/x/net/websocket"
 )
 
+type message struct {
+	Text string `json:"text"`
+}
+
 func main() {
-	conn, err := net.Dial("tcp", "server:5000")
+	connection, err := websocket.Dial("ws://server:5000/", "", "http://server/")
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(conn)
-	<-time.After(5 * time.Second)
-
-	w := bufio.NewWriter(conn)
-	w.WriteString("test\n")
-	w.Flush()
-	<-time.After(10 * time.Second)
+	defer connection.Close()
+	<-time.After(2 * time.Second)
+	message := message{"test message from the client"}
+	websocket.JSON.Send(connection, message)
+	<-time.After(2 * time.Second)
+	message.Text = "another message from the client"
+	websocket.JSON.Send(connection, message)
+	<-time.After(2 * time.Second)
 }
