@@ -6,13 +6,14 @@ import (
 	"sync"
 	"time"
 
+	"github.com/Luqqk/go-cli-chat/internal/data"
 	"golang.org/x/net/websocket"
 )
 
 func main() {
 	chat := chat{
 		connections: make([]*websocket.Conn, 0),
-		emit:        make(chan message),
+		emit:        make(chan *data.Message),
 		mutex:       sync.Mutex{},
 	}
 	go func() {

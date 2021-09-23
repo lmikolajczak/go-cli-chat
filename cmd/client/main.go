@@ -4,12 +4,9 @@ import (
 	"log"
 	"time"
 
+	"github.com/Luqqk/go-cli-chat/internal/data"
 	"golang.org/x/net/websocket"
 )
-
-type message struct {
-	Text string `json:"text"`
-}
 
 func main() {
 	connection, err := websocket.Dial("ws://server:5000/", "", "http://server/")
@@ -19,8 +16,8 @@ func main() {
 	defer connection.Close()
 	go func() {
 		for {
-			message := message{}
-			err := websocket.JSON.Receive(connection, &message)
+			message := data.NewMessage()
+			err := websocket.JSON.Receive(connection, message)
 			if err != nil {
 				return
 			}
@@ -28,7 +25,8 @@ func main() {
 		}
 	}()
 	<-time.After(2 * time.Second)
-	message := message{"test message from the client"}
+	message := data.NewMessage()
+	message.Text = "test message from the client"
 	websocket.JSON.Send(connection, message)
 	<-time.After(2 * time.Second)
 	message.Text = "another message from the client"

@@ -1,20 +1,19 @@
 package main
 
 import (
+	"log"
 	"net/http"
 	"sync"
+	"time"
+
+	"github.com/Luqqk/go-cli-chat/internal/data"
 
 	"golang.org/x/net/websocket"
 )
 
-type message struct {
-	Type string `json:"type"`
-	Text string `json:"text"`
-}
-
 type chat struct {
 	connections []*websocket.Conn
-	emit        chan message
+	emit        chan *data.Message
 	mutex       sync.Mutex
 }
 
@@ -51,12 +50,14 @@ func (chat *chat) connect() func(*websocket.Conn) {
 		chat.mutex.Unlock()
 
 		for {
-			message := message{}
-			err := websocket.JSON.Receive(connection, &message)
+			message := data.NewMessage()
+			err := websocket.JSON.Receive(connection, message)
 			if err != nil {
+				// EOF connection closed by the client
 				chat.disconnect(connection)
 				return
 			}
+			message.SetTime(time.Now())
 			chat.emit <- message
 		}
 	}
@@ -78,7 +79,7 @@ func (chat *chat) broadcast() {
 		for _, connection := range chat.connections {
 			err := websocket.JSON.Send(connection, message)
 			if err != nil {
-				chat.disconnect(connection)
+				log.Println(err)
 			}
 		}
 	}
