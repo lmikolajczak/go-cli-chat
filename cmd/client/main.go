@@ -26,6 +26,7 @@ func main() {
 	}()
 	<-time.After(2 * time.Second)
 	message := data.NewMessage()
+	message.From = "Client"
 	message.Text = "test message from the client"
 	websocket.JSON.Send(connection, message)
 	<-time.After(2 * time.Second)

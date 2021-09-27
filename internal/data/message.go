@@ -3,6 +3,7 @@ package data
 import "time"
 
 type Message struct {
+	From      string `json:"from"`
 	Text      string `json:"text"`
 	Timestamp string `json:"timestamp"`
 }
