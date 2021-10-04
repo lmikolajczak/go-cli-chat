@@ -1,6 +1,14 @@
 package main
 
-import "github.com/jroimartin/gocui"
+import (
+	"log"
+
+	"github.com/Luqqk/go-cli-chat/internal/data"
+	"github.com/jroimartin/gocui"
+	"golang.org/x/net/websocket"
+)
+
+var connection *websocket.Conn
 
 func layout(g *gocui.Gui) error {
 	maxX, maxY := g.Size()
@@ -48,5 +56,28 @@ func layout(g *gocui.Gui) error {
 }
 
 func quit(g *gocui.Gui, v *gocui.View) error {
+	connection.Close()
 	return gocui.ErrQuit
+}
+
+func connect(g *gocui.Gui, v *gocui.View) error {
+	connection, err := websocket.Dial("ws://server:5000/", "", "http://server/")
+	if err != nil {
+		return err
+	}
+	go func() {
+		for {
+			message := data.NewMessage()
+			err := websocket.JSON.Receive(connection, message)
+			if err != nil {
+				return
+			}
+			log.Println("message:", message)
+		}
+	}()
+	g.SetViewOnTop("messages")
+	g.SetViewOnTop("users")
+	g.SetViewOnTop("input")
+	g.SetCurrentView("input")
+	return nil
 }
