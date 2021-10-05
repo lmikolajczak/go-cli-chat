@@ -4,25 +4,21 @@ import (
 	"log"
 
 	"github.com/jroimartin/gocui"
+	"golang.org/x/net/websocket"
 )
 
 func main() {
-	g, err := gocui.NewGui(gocui.OutputNormal)
+	connection, err := websocket.Dial("ws://server:5000/", "", "http://server/")
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer g.Close()
-	g.SetManagerFunc(layout)
-	g.SetKeybinding("name", gocui.KeyEnter, gocui.ModNone, connect)
-	g.SetKeybinding("", gocui.KeyCtrlC, gocui.ModNone, quit)
-	g.MainLoop()
-	// <-time.After(2 * time.Second)
-	// message := data.NewMessage()
-	// message.From = "Client"
-	// message.Text = "test message from the client"
-	// websocket.JSON.Send(connection, message)
-	// <-time.After(2 * time.Second)
-	// message.Text = "another message from the client"
-	// websocket.JSON.Send(connection, message)
-	// <-time.After(10 * time.Second)
+	ui, err := NewUI(connection)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer ui.Gui.Close()
+
+	if err = ui.Gui.MainLoop(); err != nil && err != gocui.ErrQuit {
+		log.Panicln(err)
+	}
 }
