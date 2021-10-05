@@ -1,16 +1,40 @@
 package main
 
 import (
-	"log"
-
-	"github.com/Luqqk/go-cli-chat/internal/data"
 	"github.com/jroimartin/gocui"
 	"golang.org/x/net/websocket"
 )
 
-var connection *websocket.Conn
+type UI struct {
+	Gui        *gocui.Gui
+	Connection *websocket.Conn
+}
 
-func layout(g *gocui.Gui) error {
+func NewUI(connection *websocket.Conn) (*UI, error) {
+	ui := &UI{
+		Connection: connection,
+	}
+	g, err := gocui.NewGui(gocui.OutputNormal)
+	if err != nil {
+		return nil, err
+	}
+	g.SetManagerFunc(ui.layout)
+	// Empty viewname - this binding applies to all views
+	if err := g.SetKeybinding("", gocui.KeyCtrlC, gocui.ModNone, ui.quit); err != nil {
+		return nil, err
+	}
+	if err := g.SetKeybinding("name", gocui.KeyEnter, gocui.ModNone, ui.connect); err != nil {
+		return nil, err
+	}
+	if err := g.SetKeybinding("input", gocui.KeyEnter, gocui.ModNone, ui.send); err != nil {
+		return nil, err
+	}
+	ui.Gui = g
+
+	return ui, nil
+}
+
+func (ui *UI) layout(g *gocui.Gui) error {
 	maxX, maxY := g.Size()
 	g.Cursor = true
 
@@ -18,7 +42,7 @@ func layout(g *gocui.Gui) error {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
-		messages.Title = " messages: "
+		messages.Title = "messages"
 		messages.Autoscroll = true
 		messages.Wrap = true
 	}
@@ -27,7 +51,7 @@ func layout(g *gocui.Gui) error {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
-		input.Title = " send: "
+		input.Title = "send"
 		input.Autoscroll = false
 		input.Wrap = true
 		input.Editable = true
@@ -37,7 +61,7 @@ func layout(g *gocui.Gui) error {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
-		users.Title = " users: "
+		users.Title = "users"
 		users.Autoscroll = false
 		users.Wrap = true
 	}
@@ -47,7 +71,7 @@ func layout(g *gocui.Gui) error {
 			return err
 		}
 		g.SetCurrentView("name")
-		name.Title = " name: "
+		name.Title = "name"
 		name.Autoscroll = false
 		name.Wrap = true
 		name.Editable = true
@@ -55,29 +79,18 @@ func layout(g *gocui.Gui) error {
 	return nil
 }
 
-func quit(g *gocui.Gui, v *gocui.View) error {
-	connection.Close()
+func (ui *UI) quit(g *gocui.Gui, v *gocui.View) error {
 	return gocui.ErrQuit
 }
 
-func connect(g *gocui.Gui, v *gocui.View) error {
-	connection, err := websocket.Dial("ws://server:5000/", "", "http://server/")
-	if err != nil {
-		return err
-	}
-	go func() {
-		for {
-			message := data.NewMessage()
-			err := websocket.JSON.Receive(connection, message)
-			if err != nil {
-				return
-			}
-			log.Println("message:", message)
-		}
-	}()
-	g.SetViewOnTop("messages")
-	g.SetViewOnTop("users")
-	g.SetViewOnTop("input")
+func (ui *UI) connect(g *gocui.Gui, v *gocui.View) error {
+	g.SetViewOnBottom("name")
 	g.SetCurrentView("input")
+	return nil
+}
+
+func (ui *UI) send(g *gocui.Gui, v *gocui.View) error {
+	v.SetCursor(0, 0)
+	v.Clear()
 	return nil
 }
