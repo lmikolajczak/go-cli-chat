@@ -18,7 +18,18 @@ func main() {
 	}
 	defer ui.Gui.Close()
 
-	if err = ui.Gui.MainLoop(); err != nil && err != gocui.ErrQuit {
-		log.Panicln(err)
+	ui.SetManagerFunc(ui.layout)
+	if err := ui.SetKeybinding("", gocui.KeyCtrlC, gocui.ModNone, ui.quit); err != nil {
+		log.Fatalln(err)
+	}
+	if err := ui.SetKeybinding("name", gocui.KeyEnter, gocui.ModNone, ui.setName); err != nil {
+		log.Fatalln(err)
+	}
+	if err := ui.SetKeybinding("input", gocui.KeyEnter, gocui.ModNone, ui.sendMsg); err != nil {
+		log.Fatalln(err)
+	}
+
+	if err = ui.MainLoop(); err != nil && err != gocui.ErrQuit {
+		log.Fatalln(err)
 	}
 }
