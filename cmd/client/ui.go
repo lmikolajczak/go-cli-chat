@@ -6,30 +6,16 @@ import (
 )
 
 type UI struct {
-	Gui        *gocui.Gui
+	*gocui.Gui
 	Connection *websocket.Conn
 }
 
 func NewUI(connection *websocket.Conn) (*UI, error) {
-	ui := &UI{
-		Connection: connection,
-	}
 	g, err := gocui.NewGui(gocui.OutputNormal)
 	if err != nil {
 		return nil, err
 	}
-	g.SetManagerFunc(ui.layout)
-	// Empty viewname - this binding applies to all views
-	if err := g.SetKeybinding("", gocui.KeyCtrlC, gocui.ModNone, ui.quit); err != nil {
-		return nil, err
-	}
-	if err := g.SetKeybinding("name", gocui.KeyEnter, gocui.ModNone, ui.connect); err != nil {
-		return nil, err
-	}
-	if err := g.SetKeybinding("input", gocui.KeyEnter, gocui.ModNone, ui.send); err != nil {
-		return nil, err
-	}
-	ui.Gui = g
+	ui := &UI{Gui: g, Connection: connection}
 
 	return ui, nil
 }
@@ -83,13 +69,13 @@ func (ui *UI) quit(g *gocui.Gui, v *gocui.View) error {
 	return gocui.ErrQuit
 }
 
-func (ui *UI) connect(g *gocui.Gui, v *gocui.View) error {
+func (ui *UI) setName(g *gocui.Gui, v *gocui.View) error {
 	g.SetViewOnBottom("name")
 	g.SetCurrentView("input")
 	return nil
 }
 
-func (ui *UI) send(g *gocui.Gui, v *gocui.View) error {
+func (ui *UI) sendMsg(g *gocui.Gui, v *gocui.View) error {
 	v.SetCursor(0, 0)
 	v.Clear()
 	return nil
