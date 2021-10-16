@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/Luqqk/go-cli-chat/internal/data"
 	"github.com/jroimartin/gocui"
 	"golang.org/x/net/websocket"
 )
@@ -76,6 +77,13 @@ func (ui *UI) setName(g *gocui.Gui, v *gocui.View) error {
 }
 
 func (ui *UI) sendMsg(g *gocui.Gui, v *gocui.View) error {
+	message := data.Message{
+		Text: v.Buffer(),
+	}
+	err := websocket.JSON.Send(ui.Connection, message)
+	if err != nil {
+		return err
+	}
 	v.SetCursor(0, 0)
 	v.Clear()
 	return nil
