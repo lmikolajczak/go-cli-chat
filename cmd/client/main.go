@@ -16,7 +16,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer ui.Gui.Close()
+	defer ui.Close()
 
 	ui.SetManagerFunc(ui.layout)
 	if err := ui.SetKeybinding("", gocui.KeyCtrlC, gocui.ModNone, ui.quit); err != nil {
@@ -28,7 +28,7 @@ func main() {
 	if err := ui.SetKeybinding("input", gocui.KeyEnter, gocui.ModNone, ui.sendMsg); err != nil {
 		log.Fatalln(err)
 	}
-
+	go ui.receiveMsg()
 	if err = ui.MainLoop(); err != nil && err != gocui.ErrQuit {
 		log.Fatalln(err)
 	}

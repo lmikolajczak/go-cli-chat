@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/Luqqk/go-cli-chat/internal/data"
 	"github.com/jroimartin/gocui"
 	"golang.org/x/net/websocket"
@@ -8,6 +11,7 @@ import (
 
 type UI struct {
 	*gocui.Gui
+	Username   string
 	Connection *websocket.Conn
 }
 
@@ -71,6 +75,7 @@ func (ui *UI) quit(g *gocui.Gui, v *gocui.View) error {
 }
 
 func (ui *UI) setName(g *gocui.Gui, v *gocui.View) error {
+	ui.Username = strings.TrimRight(v.Buffer(), "\n")
 	g.SetViewOnBottom("name")
 	g.SetCurrentView("input")
 	return nil
@@ -78,6 +83,7 @@ func (ui *UI) setName(g *gocui.Gui, v *gocui.View) error {
 
 func (ui *UI) sendMsg(g *gocui.Gui, v *gocui.View) error {
 	message := data.Message{
+		From: ui.Username,
 		Text: v.Buffer(),
 	}
 	err := websocket.JSON.Send(ui.Connection, message)
@@ -87,4 +93,20 @@ func (ui *UI) sendMsg(g *gocui.Gui, v *gocui.View) error {
 	v.SetCursor(0, 0)
 	v.Clear()
 	return nil
+}
+
+func (ui *UI) receiveMsg() {
+	for {
+		message := data.NewMessage()
+		err := websocket.JSON.Receive(ui.Connection, message)
+		if err != nil {
+			return
+		}
+
+		view, _ := ui.View("messages")
+		ui.Update(func(g *gocui.Gui) error {
+			fmt.Fprint(view, message.Formatted())
+			return nil
+		})
+	}
 }

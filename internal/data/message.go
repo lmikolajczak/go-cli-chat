@@ -1,6 +1,9 @@
 package data
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 type Message struct {
 	From      string `json:"from"`
@@ -14,4 +17,8 @@ func NewMessage() *Message {
 
 func (m *Message) SetTime(v time.Time) {
 	m.Timestamp = v.Format(time.Kitchen)
+}
+
+func (m *Message) Formatted() string {
+	return fmt.Sprintf("%v %v: %v", m.Timestamp, m.From, m.Text)
 }
