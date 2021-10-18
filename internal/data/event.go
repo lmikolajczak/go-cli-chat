@@ -1,9 +1,5 @@
 package data
 
-import (
-	"golang.org/x/net/websocket"
-)
-
 type EventType int8
 
 const (
@@ -12,13 +8,13 @@ const (
 )
 
 type Event struct {
-	Type       EventType
-	Connection *websocket.Conn
+	Type EventType
+	User *User
 }
 
-func NewEvent(_type EventType, connection *websocket.Conn) *Event {
+func NewEvent(_type EventType, user *User) *Event {
 	return &Event{
-		Type:       _type,
-		Connection: connection,
+		Type: _type,
+		User: user,
 	}
 }
