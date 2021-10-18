@@ -11,9 +11,9 @@ import (
 )
 
 type chat struct {
-	connections []*websocket.Conn
-	emit        chan *data.Message
-	event       chan *data.Event
+	users []*data.User
+	emit  chan *data.Message
+	event chan *data.Event
 }
 
 func (chat *chat) serve() {
@@ -44,14 +44,15 @@ func (chat *chat) mux() http.Handler {
 
 func (chat *chat) handler() func(*websocket.Conn) {
 	return func(connection *websocket.Conn) {
-		chat.event <- data.NewEvent(data.ConnectEvent, connection)
+		user := data.NewUser(connection)
+		chat.event <- data.NewEvent(data.ConnectEvent, user)
 
 		for {
 			message := data.NewMessage()
-			err := websocket.JSON.Receive(connection, message)
+			err := websocket.JSON.Receive(user.Connection, message)
 			if err != nil {
 				// EOF connection closed by the client
-				chat.event <- data.NewEvent(data.DisconnectEvent, connection)
+				chat.event <- data.NewEvent(data.DisconnectEvent, user)
 				return
 			}
 			message.SetTime(time.Now())
@@ -60,22 +61,22 @@ func (chat *chat) handler() func(*websocket.Conn) {
 	}
 }
 
-func (chat *chat) join(connection *websocket.Conn) {
-	chat.connections = append(chat.connections, connection)
+func (chat *chat) join(user *data.User) {
+	chat.users = append(chat.users, user)
 }
 
-func (chat *chat) disconnect(connection *websocket.Conn) {
-	connection.Close()
-	for i := len(chat.connections) - 1; i >= 0; i-- {
-		if chat.connections[i] == connection {
-			chat.connections = append(chat.connections[:i], chat.connections[i+1:]...)
+func (chat *chat) disconnect(user *data.User) {
+	user.Connection.Close()
+	for i := len(chat.users) - 1; i >= 0; i-- {
+		if chat.users[i] == user {
+			chat.users = append(chat.users[:i], chat.users[i+1:]...)
 		}
 	}
 }
 
 func (chat *chat) broadcast(message *data.Message) {
-	for _, connection := range chat.connections {
-		err := websocket.JSON.Send(connection, message)
+	for _, user := range chat.users {
+		err := websocket.JSON.Send(user.Connection, message)
 		if err != nil {
 			log.Println(err)
 		}
@@ -90,9 +91,9 @@ func (chat *chat) run() {
 		case event := <-chat.event:
 			switch event.Type {
 			case data.ConnectEvent:
-				chat.join(event.Connection)
+				chat.join(event.User)
 			case data.DisconnectEvent:
-				chat.disconnect(event.Connection)
+				chat.disconnect(event.User)
 			}
 		}
 	}
