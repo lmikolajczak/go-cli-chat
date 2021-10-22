@@ -11,9 +11,10 @@ import (
 )
 
 type chat struct {
-	users []*data.User
-	emit  chan *data.Message
-	event chan *data.Event
+	users        []*data.User
+	emit         chan *data.Message
+	event        chan *data.Event
+	notification chan *data.Notification
 }
 
 func (chat *chat) serve() {
@@ -63,6 +64,7 @@ func (chat *chat) handler() func(*websocket.Conn) {
 
 func (chat *chat) join(user *data.User) {
 	chat.users = append(chat.users, user)
+	chat.notification <- data.NewNotification(data.ConnectedUsers, chat.users)
 }
 
 func (chat *chat) disconnect(user *data.User) {
@@ -83,6 +85,15 @@ func (chat *chat) broadcast(message *data.Message) {
 	}
 }
 
+func (chat *chat) notify(notification *data.Notification) {
+	for _, user := range chat.users {
+		err := websocket.JSON.Send(user.Connection, notification)
+		if err != nil {
+			log.Println(err)
+		}
+	}
+}
+
 func (chat *chat) run() {
 	for {
 		select {
@@ -94,6 +105,11 @@ func (chat *chat) run() {
 				chat.join(event.User)
 			case data.DisconnectEvent:
 				chat.disconnect(event.User)
+			}
+		case notification := <-chat.notification:
+			switch notification.Type {
+			case data.ConnectedUsers:
+				chat.notify(notification)
 			}
 		}
 	}
