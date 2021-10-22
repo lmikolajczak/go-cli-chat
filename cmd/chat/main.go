@@ -10,9 +10,10 @@ import (
 
 func main() {
 	chat := chat{
-		users: make([]*data.User, 0),
-		emit:  make(chan *data.Message),
-		event: make(chan *data.Event),
+		users:        make([]*data.User, 0),
+		emit:         make(chan *data.Message),
+		event:        make(chan *data.Event),
+		notification: make(chan *data.Notification, 1),
 	}
 	go func() {
 		for {
