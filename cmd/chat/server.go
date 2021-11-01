@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -47,6 +48,7 @@ func (chat *chat) handler() func(*websocket.Conn) {
 	return func(connection *websocket.Conn) {
 		user := data.NewUser(connection)
 		chat.event <- data.NewEvent(data.ConnectEvent, user)
+		chat.notification <- data.NewNotification(data.ConnectedUsers, chat.listUsers())
 
 		for {
 			message := data.NewMessage()
@@ -64,7 +66,6 @@ func (chat *chat) handler() func(*websocket.Conn) {
 
 func (chat *chat) join(user *data.User) {
 	chat.users = append(chat.users, user)
-	chat.notification <- data.NewNotification(data.ConnectedUsers, chat.users)
 }
 
 func (chat *chat) disconnect(user *data.User) {
@@ -74,6 +75,15 @@ func (chat *chat) disconnect(user *data.User) {
 			chat.users = append(chat.users[:i], chat.users[i+1:]...)
 		}
 	}
+}
+
+func (chat *chat) listUsers() string {
+	users := ""
+	for _, user := range chat.users {
+		users += fmt.Sprintf("%v \n", user.Name)
+	}
+	fmt.Println(users)
+	return users
 }
 
 func (chat *chat) broadcast(message *data.Message) {
