@@ -95,17 +95,31 @@ func (ui *UI) sendMsg(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+type Payload struct {
+	data.Message
+	data.Notification
+}
+
 func (ui *UI) receiveMsg() {
 	for {
-		message := data.NewMessage()
-		err := websocket.JSON.Receive(ui.Connection, message)
+		payload := &Payload{}
+		err := websocket.JSON.Receive(ui.Connection, payload)
 		if err != nil {
 			return
 		}
 
-		view, _ := ui.View("messages")
 		ui.Update(func(g *gocui.Gui) error {
-			fmt.Fprint(view, message.Formatted())
+			switch {
+			case payload.Message != data.Message{}:
+				view, _ := ui.View("messages")
+				fmt.Fprint(view, payload.Message.Formatted())
+			case payload.Notification != data.Notification{}:
+				view, _ := ui.View("users")
+				switch payload.Notification.Type {
+				case data.ConnectedUsers:
+					fmt.Fprint(view, payload.Notification.Formatted())
+				}
+			}
 			return nil
 		})
 	}
