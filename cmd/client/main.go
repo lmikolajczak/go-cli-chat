@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 
 	"github.com/jroimartin/gocui"
@@ -8,11 +9,19 @@ import (
 )
 
 func main() {
-	connection, err := websocket.Dial("ws://server:5000/", "", "http://server/")
+	var username string
+	flag.StringVar(&username, "username", "anonymous", "Chat username")
+	flag.Parse()
+	config, err := websocket.NewConfig("ws://server:5000/", "http://server/")
+	config.Header.Set("Username", username)
 	if err != nil {
 		log.Fatal(err)
 	}
-	ui, err := NewUI(connection)
+	connection, err := websocket.DialConfig(config)
+	if err != nil {
+		log.Fatal(err)
+	}
+	ui, err := NewUI(connection, username)
 	if err != nil {
 		log.Fatal(err)
 	}
