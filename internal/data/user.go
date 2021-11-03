@@ -7,8 +7,9 @@ type User struct {
 	Connection *websocket.Conn `json:"-"`
 }
 
-func NewUser(connection *websocket.Conn) *User {
+func NewUser(connection *websocket.Conn, name string) *User {
 	return &User{
+		Name:       name,
 		Connection: connection,
 	}
 }

@@ -12,10 +12,9 @@ import (
 )
 
 type chat struct {
-	users        []*data.User
-	emit         chan *data.Message
-	event        chan *data.Event
-	notification chan *data.Notification
+	users []*data.User
+	emit  chan *data.Message
+	event chan *data.Event
 }
 
 func (chat *chat) serve() {
@@ -46,9 +45,9 @@ func (chat *chat) mux() http.Handler {
 
 func (chat *chat) handler() func(*websocket.Conn) {
 	return func(connection *websocket.Conn) {
-		user := data.NewUser(connection)
+		username := connection.Request().Header.Get("Username")
+		user := data.NewUser(connection, username)
 		chat.event <- data.NewEvent(data.ConnectEvent, user)
-		chat.notification <- data.NewNotification(data.ConnectedUsers, chat.listUsers())
 
 		for {
 			message := data.NewMessage()
@@ -82,7 +81,6 @@ func (chat *chat) listUsers() string {
 	for _, user := range chat.users {
 		users += fmt.Sprintf("%v \n", user.Name)
 	}
-	fmt.Println(users)
 	return users
 }
 
@@ -113,13 +111,20 @@ func (chat *chat) run() {
 			switch event.Type {
 			case data.ConnectEvent:
 				chat.join(event.User)
+				chat.notify(
+					data.NewNotification(
+						data.ConnectedUsers,
+						chat.listUsers(),
+					),
+				)
 			case data.DisconnectEvent:
 				chat.disconnect(event.User)
-			}
-		case notification := <-chat.notification:
-			switch notification.Type {
-			case data.ConnectedUsers:
-				chat.notify(notification)
+				chat.notify(
+					data.NewNotification(
+						data.ConnectedUsers,
+						chat.listUsers(),
+					),
+				)
 			}
 		}
 	}

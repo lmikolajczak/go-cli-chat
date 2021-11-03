@@ -15,12 +15,12 @@ type UI struct {
 	Connection *websocket.Conn
 }
 
-func NewUI(connection *websocket.Conn) (*UI, error) {
+func NewUI(connection *websocket.Conn, username string) (*UI, error) {
 	g, err := gocui.NewGui(gocui.OutputNormal)
 	if err != nil {
 		return nil, err
 	}
-	ui := &UI{Gui: g, Connection: connection}
+	ui := &UI{Gui: g, Connection: connection, Username: username}
 
 	return ui, nil
 }
@@ -56,17 +56,8 @@ func (ui *UI) layout(g *gocui.Gui) error {
 		users.Autoscroll = false
 		users.Wrap = true
 	}
+	g.SetCurrentView("input")
 
-	if name, err := g.SetView("name", maxX/2-10, maxY/2-1, maxX/2+10, maxY/2+1); err != nil {
-		if err != gocui.ErrUnknownView {
-			return err
-		}
-		g.SetCurrentView("name")
-		name.Title = "name"
-		name.Autoscroll = false
-		name.Wrap = true
-		name.Editable = true
-	}
 	return nil
 }
 
@@ -95,14 +86,9 @@ func (ui *UI) sendMsg(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-type Payload struct {
-	data.Message
-	data.Notification
-}
-
 func (ui *UI) receiveMsg() {
 	for {
-		payload := &Payload{}
+		payload := &data.Payload{}
 		err := websocket.JSON.Receive(ui.Connection, payload)
 		if err != nil {
 			return
@@ -117,6 +103,7 @@ func (ui *UI) receiveMsg() {
 				view, _ := ui.View("users")
 				switch payload.Notification.Type {
 				case data.ConnectedUsers:
+					view.Clear()
 					fmt.Fprint(view, payload.Notification.Formatted())
 				}
 			}
