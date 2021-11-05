@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/Luqqk/go-cli-chat/internal/data"
 	"github.com/jroimartin/gocui"
@@ -63,13 +62,6 @@ func (ui *UI) layout(g *gocui.Gui) error {
 
 func (ui *UI) quit(g *gocui.Gui, v *gocui.View) error {
 	return gocui.ErrQuit
-}
-
-func (ui *UI) setName(g *gocui.Gui, v *gocui.View) error {
-	ui.Username = strings.TrimRight(v.Buffer(), "\n")
-	g.SetViewOnBottom("name")
-	g.SetCurrentView("input")
-	return nil
 }
 
 func (ui *UI) sendMsg(g *gocui.Gui, v *gocui.View) error {
