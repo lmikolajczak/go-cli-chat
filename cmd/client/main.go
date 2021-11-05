@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"log"
+	"strings"
 
 	"github.com/jroimartin/gocui"
 	"golang.org/x/net/websocket"
@@ -10,8 +11,11 @@ import (
 
 func main() {
 	var username string
-	flag.StringVar(&username, "username", "anonymous", "Chat username")
+	flag.StringVar(&username, "username", "", "Chat username")
 	flag.Parse()
+	if len(strings.TrimSpace(username)) == 0 {
+		log.Fatal("missing -username option (required)")
+	}
 	config, err := websocket.NewConfig("ws://server:5000/", "http://server/")
 	config.Header.Set("Username", username)
 	if err != nil {
@@ -29,9 +33,6 @@ func main() {
 
 	ui.SetManagerFunc(ui.layout)
 	if err := ui.SetKeybinding("", gocui.KeyCtrlC, gocui.ModNone, ui.quit); err != nil {
-		log.Fatalln(err)
-	}
-	if err := ui.SetKeybinding("name", gocui.KeyEnter, gocui.ModNone, ui.setName); err != nil {
 		log.Fatalln(err)
 	}
 	if err := ui.SetKeybinding("input", gocui.KeyEnter, gocui.ModNone, ui.sendMsg); err != nil {
