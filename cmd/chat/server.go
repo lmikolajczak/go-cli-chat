@@ -17,9 +17,9 @@ type chat struct {
 	event chan *data.Event
 }
 
-func (chat *chat) serve() {
+func (chat *chat) serve(port int) {
 	srv := http.Server{
-		Addr:    ":5000",
+		Addr:    fmt.Sprintf(":%v", port),
 		Handler: chat.mux(),
 	}
 	go chat.run()
