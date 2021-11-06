@@ -65,6 +65,11 @@ func (ui *UI) quit(g *gocui.Gui, v *gocui.View) error {
 }
 
 func (ui *UI) sendMsg(g *gocui.Gui, v *gocui.View) error {
+	if len(v.Buffer()) == 0 {
+		v.SetCursor(0, 0)
+		v.Clear()
+		return nil
+	}
 	message := data.Message{
 		From: ui.Username,
 		Text: v.Buffer(),
