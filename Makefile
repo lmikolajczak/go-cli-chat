@@ -1,18 +1,8 @@
 GOCMD=go
 GOBUILD=$(GOCMD) build
-GOINSTALL=$(GOCMD) install
 
-build: 
-	$(GOBUILD) -o ./cmd/chat-server/chat-server ./cmd/chat-server/
-	$(GOBUILD) -o ./cmd/chat-client/chat-client ./cmd/chat-client/
+build-server:
+	cd cmd/server && $(GOBUILD) -o /go/bin/go-cli-chat-server
 
-install:
-	$(GOINSTALL) ./...
-
-run-server:
-	$(GOBUILD) -o ./cmd/chat-server/chat-server ./cmd/chat-server/
-	./cmd/chat-server/chat-server
-
-run-client:
-	$(GOBUILD) -o ./cmd/chat-client/chat-client ./cmd/chat-client/
-	./cmd/chat-client/chat-client
+build-client:
+	cd cmd/client && $(GOBUILD) -o /go/bin/go-cli-chat-client

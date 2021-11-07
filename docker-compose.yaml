@@ -1,13 +1,7 @@
 services:
-  server:
+  go-cli-chat:
     build: .
-    image: server
-    container_name: server
-    volumes:
-      - .:/code
-  client:
-    build: .
-    image: client
-    container_name: client
+    image: go-cli-chat
+    container_name: go-cli-chat
     volumes:
       - .:/code
