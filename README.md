@@ -2,48 +2,33 @@
 
 ## 💬 go-cli-chat
 
-Chat server and client written in Go (simple prototype for learning purposes). The application heavily utilizes goroutines and channels. Go makes the concurrency easy to use and I had a lot of fun during development of this simple app.
+Chat server and client written in Go (simple prototype for learning purposes). The application utilizes goroutines and channels.
 
-![chat-client](assets/chat.png)
+![chat-client](assets/chat-server-client.png)
 
 ### Usage
 
 ```bash
-$ go get github.com/Luqqk/go-cli-chat/...
+# Build and start container:
+docker compose up -d
+# Enter go-cli-chat container:
+docker exec -it go-cli-chat bash
+# Run chat server within go-cli-chat container:
+go-cli-chat-server
+# Open another go-cli-chat container and start client:
+go-cli-chat-client -username Luqqk
 ```
 
-Now you can run server and client:
+You can also make changes and rebuild either `client` or `server` by using:
 
 ```bash
-$ $GOPATH/bin/chat-server
+$ make build-server
 ```
 
 ```bash
-$ $GOPATH/bin/chat-client
+$ make build-client
 ```
 
-You can also use `make` commands:
+### Contributing
 
-Build and run `chat-server`:
-
-```bash
-$ make run-server
-```
-
-Build and run `chat-client`:
-
-```bash
-$ make run-client
-```
-
-Build `chat-server`, `chat-client` and put binaries into corresponding `cmd/*` dir:
-
-```bash
-$ make build
-```
-
-Install `chat-server`, `chat-client` and put binaries into `$GOPATH/bin/` dir:
-
-```bash
-$ make install
-```
+I am open to, and grateful for, any contributions made by the community.
