@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"strings"
 
@@ -11,12 +12,14 @@ import (
 
 func main() {
 	var username string
+	var port int
 	flag.StringVar(&username, "username", "", "Chat username")
+	flag.IntVar(&port, "port", 5000, "Server port")
 	flag.Parse()
 	if len(strings.TrimSpace(username)) == 0 {
 		log.Fatal("missing -username option (required)")
 	}
-	config, err := websocket.NewConfig("ws://server:5000/", "http://server/")
+	config, err := websocket.NewConfig(fmt.Sprintf("ws://:%v/", port), "http://")
 	config.Header.Set("Username", username)
 	if err != nil {
 		log.Fatal(err)
