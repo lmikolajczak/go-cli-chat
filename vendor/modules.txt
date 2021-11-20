@@ -1,0 +1,12 @@
+# github.com/jroimartin/gocui v0.5.0
+## explicit
+github.com/jroimartin/gocui
+# github.com/mattn/go-runewidth v0.0.9
+## explicit
+github.com/mattn/go-runewidth
+# github.com/nsf/termbox-go v1.1.1
+## explicit
+github.com/nsf/termbox-go
+# golang.org/x/net v0.0.0-20210917221730-978cfadd31cf
+## explicit
+golang.org/x/net/websocket
