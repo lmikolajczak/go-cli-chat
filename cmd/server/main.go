@@ -7,7 +7,7 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/Luqqk/go-cli-chat/internal/data"
+	"github.com/lmikolajczak/go-cli-chat/internal/data"
 )
 
 func main() {

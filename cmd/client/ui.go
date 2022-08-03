@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 
-	"github.com/Luqqk/go-cli-chat/internal/data"
 	"github.com/jroimartin/gocui"
+	"github.com/lmikolajczak/go-cli-chat/internal/data"
 	"golang.org/x/net/websocket"
 )
 

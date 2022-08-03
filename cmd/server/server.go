@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/Luqqk/go-cli-chat/internal/data"
+	"github.com/lmikolajczak/go-cli-chat/internal/data"
 
 	"golang.org/x/net/websocket"
 )

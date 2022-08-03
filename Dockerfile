@@ -3,7 +3,11 @@ FROM golang:1.17
 WORKDIR /code
 COPY . .
 
-RUN go get -d ./...
+# Pre-copy/cache go.mod for pre-downloading dependencies and only redownloading them
+# in subsequent builds if they change.
+COPY go.mod go.sum* .
+RUN go mod download && go mod verify
+
 RUN make build-server
 RUN make build-client
 
