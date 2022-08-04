@@ -4,7 +4,7 @@
 
 Chat server and client written in Go (simple prototype for learning purposes). The application utilizes goroutines and channels.
 
-![![asciicast](https://asciinema.org/a/512757.svg)](https://asciinema.org/a/512757)
+[![demo](https://asciinema.org/a/512757.svg)](https://asciinema.org/a/512757)
 
 ### Usage
 
