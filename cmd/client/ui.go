@@ -4,8 +4,9 @@ import (
 	"fmt"
 
 	"github.com/jroimartin/gocui"
-	"github.com/lmikolajczak/go-cli-chat/internal/data"
 	"golang.org/x/net/websocket"
+
+	"github.com/lmikolajczak/go-cli-chat/internal/data"
 )
 
 type UI struct {
