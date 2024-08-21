@@ -1,6 +1,6 @@
 module github.com/lmikolajczak/go-cli-chat
 
-go 1.20
+go 1.23
 
 require (
 	github.com/jroimartin/gocui v0.5.0
