@@ -15,8 +15,8 @@ docker compose up -d
 docker exec -it go-cli-chat bash
 # Run chat server within go-cli-chat container:
 go-cli-chat-server
-# Open another go-cli-chat container and start client:
-go-cli-chat-client -username Luqqk
+# Open another go-cli-chat container and start client with the given username:
+go-cli-chat-client Lukasz
 ```
 
 You can also make changes and rebuild either `client` or `server` by using:
